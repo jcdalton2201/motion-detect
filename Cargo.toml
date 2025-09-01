@@ -1,0 +1,9 @@
+[package]
+name = "motion-detect"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+opencv = "0.95"
+ndarray = "0.15"
+realfft = "3"
