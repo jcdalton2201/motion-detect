@@ -32,9 +32,7 @@ impl Stabilizer {
 
         // Detect features in current frame
         let mut gray = Mat::default();
-        imgproc::cvt_color(frame, &mut gray, imgproc::COLOR_BGR2GRAY, 0, unsafe {
-            std::mem::transmute(core::ALGO_HINT_ACCURATE)
-        })?;
+        imgproc::cvt_color(frame, &mut gray, imgproc::COLOR_BGR2GRAY, 0)?;
 
         let mut current_features = opencv::core::Vector::new();
 
@@ -75,9 +73,7 @@ impl Stabilizer {
 
     fn initialize_reference(&mut self, frame: &Mat) -> opencv::Result<()> {
         let mut gray = Mat::default();
-        imgproc::cvt_color(frame, &mut gray, imgproc::COLOR_BGR2GRAY, 0, unsafe {
-            std::mem::transmute(core::ALGO_HINT_ACCURATE)
-        })?;
+        imgproc::cvt_color(frame, &mut gray, imgproc::COLOR_BGR2GRAY, 0)?;
 
         imgproc::good_features_to_track(
             &gray,
@@ -252,9 +248,7 @@ impl Mask {
     fn auto_detect_edges(&mut self, frame: &Mat) -> opencv::Result<()> {
         // Convert to grayscale for edge detection
         let mut gray = Mat::default();
-        imgproc::cvt_color(frame, &mut gray, imgproc::COLOR_BGR2GRAY, 0, unsafe {
-            std::mem::transmute(core::ALGO_HINT_ACCURATE)
-        })?;
+        imgproc::cvt_color(frame, &mut gray, imgproc::COLOR_BGR2GRAY, 0)?;
 
         // Resize to mask size if needed
         let mask_size = self.mask_image.size()?;
@@ -280,7 +274,6 @@ impl Mask {
             1.0,
             1.0,
             core::BORDER_DEFAULT,
-            unsafe { std::mem::transmute(core::ALGO_HINT_ACCURATE) },
         )?;
 
         // Detect edges using Canny
@@ -318,7 +311,7 @@ impl Mask {
 //
 // Key advantages of phase-based amplification:
 // 1. Better noise handling - phase is more robust to noise than amplitude
-// 2. Artifact reduction - avoids over-amplification of large motions
+// 2. Artifact reduction - avoids over‑amplification of large motions
 // 3. Directional sensitivity - different orientations can be processed independently
 // 4. Frequency selectivity - temporal filtering in phase domain is more precise
 //
@@ -762,17 +755,14 @@ fn main() -> opencv::Result<()> {
 
     println!("Recording to intermediate AVI format...");
 
-    // AlgorithmHint value (bindings difference safe): build from raw constant
-    let hint: core::AlgorithmHint = unsafe { std::mem::transmute(core::ALGO_HINT_ACCURATE) };
-
-    // --- Windows
+    // ----- Windows -----
     highgui::named_window("Magnified", highgui::WINDOW_NORMAL)?;
     highgui::resize_window("Magnified", 960, 540)?;
     highgui::named_window("Magnified Controls", highgui::WINDOW_AUTOSIZE)?;
     highgui::named_window("Mask Editor", highgui::WINDOW_NORMAL)?;
     highgui::resize_window("Mask Editor", 480, 360)?;
 
-    // --- Trackbars (integers we map to floats each frame)
+    // ----- Trackbars (integers we map to floats each frame)
     // alpha: 0..100  -> alpha f32
     // fl:   0..100  -> 0.00..10.00 Hz
     // fh:   0..100  -> 0.00..10.00 Hz (we'll enforce fh > fl)
@@ -1029,7 +1019,7 @@ fn main() -> opencv::Result<()> {
 
         // Convert BGR -> YCrCb
         let mut ycrcb = Mat::default();
-        imgproc::cvt_color(&bgr, &mut ycrcb, imgproc::COLOR_BGR2YCrCb, 0, hint)?;
+        imgproc::cvt_color(&bgr, &mut ycrcb, imgproc::COLOR_BGR2YCrCb, 0)?;
 
         // Split channels, work on luma
         let mut planes = opencv::core::Vector::new();
@@ -1148,13 +1138,7 @@ fn main() -> opencv::Result<()> {
         core::merge(&planes, &mut out_ycrcb)?;
 
         let mut out_frame = Mat::default();
-        imgproc::cvt_color(
-            &out_ycrcb,
-            &mut out_frame,
-            imgproc::COLOR_YCrCb2BGR,
-            0,
-            hint,
-        )?;
+        imgproc::cvt_color(&out_ycrcb, &mut out_frame, imgproc::COLOR_YCrCb2BGR, 0)?;
 
         // Display current params overlay (nice for tuning)
         let overlay1 = if sweep.is_active {
@@ -1233,13 +1217,7 @@ fn main() -> opencv::Result<()> {
             imgproc::INTER_LINEAR,
         )?;
         let mut mask_colored = Mat::default();
-        imgproc::cvt_color(
-            &mask_display,
-            &mut mask_colored,
-            imgproc::COLOR_GRAY2BGR,
-            0,
-            unsafe { std::mem::transmute(core::ALGO_HINT_ACCURATE) },
-        )?;
+        imgproc::cvt_color(&mask_display, &mut mask_colored, imgproc::COLOR_GRAY2BGR, 0)?;
 
         // Add status text to mask editor
         let mask_text = if mask.is_active {
